@@ -30,6 +30,7 @@
 #include <linux/of_platform.h>
 #include <linux/sched/task.h>
 #include <linux/swiotlb.h>
+#include <linux/dma-contiguous.h>
 
 #include <asm/setup.h>
 #include <asm/sections.h>
@@ -237,7 +238,8 @@ void __init setup_arch(char **cmdline_p)
 	setup_bootmem();
 	paging_init();
 	unflatten_device_tree();
-
+	printk("calling dma_contiguous_reserve\n");
+	dma_contiguous_reserve(0);
 #ifdef CONFIG_SWIOTLB
 	swiotlb_init(1);
 #endif
