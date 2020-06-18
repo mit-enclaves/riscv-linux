@@ -1,0 +1,11 @@
+#
+# MIT Sanctum security monitor interface
+#
+
+menu "MIT Sanctum security monitor interface"
+
+config LKM_SM
+	tristate "MIT Sanctum security monitor interface"
+	default y
+
+endmenu
