@@ -116,6 +116,10 @@ relocate:
 .option push
 .option norelax
 	la gp, __global_pointer$
+	li a1, PAGE_OFFSET
+	add gp, gp, a1
+	la a1, _start
+	sub gp, gp, a1
 .option pop
 
 	/* Switch to kernel page tables */
