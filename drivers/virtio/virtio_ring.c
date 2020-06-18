@@ -176,6 +176,8 @@ static dma_addr_t vring_map_one_sg(const struct vring_virtqueue *vq,
 				   struct scatterlist *sg,
 				   enum dma_data_direction direction)
 {
+	// SANCTUM: flush cache (maybe sfence.i would work here?)
+	csr_write(0x5c9, 1);
 	if (!vring_use_dma_api(vq->vq.vdev))
 		return (dma_addr_t)sg_phys(sg);
 
@@ -193,6 +195,8 @@ static dma_addr_t vring_map_single(const struct vring_virtqueue *vq,
 				   void *cpu_addr, size_t size,
 				   enum dma_data_direction direction)
 {
+	// SANCTUM: flush cache (maybe sfence.i would work here?)
+	csr_write(0x5c9, 1);
 	if (!vring_use_dma_api(vq->vq.vdev))
 		return (dma_addr_t)virt_to_phys(cpu_addr);
 
@@ -939,11 +943,12 @@ irqreturn_t vring_interrupt(int irq, void *_vq)
 
 	if (!more_used(vq)) {
 		pr_debug("virtqueue interrupt with no work for %p\n", vq);
-		return IRQ_NONE;
+		return IRQ_HANDLED;
 	}
 
-	if (unlikely(vq->broken))
+	if (unlikely(vq->broken)) {
 		return IRQ_HANDLED;
+	}
 
 	pr_debug("virtqueue callback for %p (%p)\n", vq, vq->vq.callback);
 	if (vq->vq.callback)
