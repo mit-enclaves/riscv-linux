@@ -290,6 +290,7 @@ static irqreturn_t vm_interrupt(int irq, void *opaque)
 	struct virtio_mmio_vq_info *info;
 	unsigned long status;
 	unsigned long flags;
+	// no sharing, we always handled it so irqpoll will not disable it
 	irqreturn_t ret = IRQ_NONE;
 
 	/* Read and acknowledge interrupts */
@@ -307,7 +308,10 @@ static irqreturn_t vm_interrupt(int irq, void *opaque)
 			ret |= vring_interrupt(irq, info->vq);
 		spin_unlock_irqrestore(&vm_dev->lock, flags);
 	}
-
+	if (ret == IRQ_NONE) {
+		printk("virtio_interrupt NONE\n");
+		ret = IRQ_HANDLED;
+	}
 	return ret;
 }
 
@@ -598,6 +602,7 @@ static int virtio_mmio_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, vm_dev);
 
+	printk("registering virtio mmio device\n");
 	rc = register_virtio_device(&vm_dev->vdev);
 	if (rc)
 		put_device(&vm_dev->vdev.dev);
